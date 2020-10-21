@@ -29,15 +29,36 @@ app.use(bodyParser.urlencoded({
     extended:false
 }));
 
-//获取房源分类的接口
+//轮播图分类的接口
 app.get('/category',(req,res)=>{
     let sql='SELECT id,imgs FROM gspro_carousel';
     pool.query(sql,(err,results)=>{
         if(err) throw err;
         res.send({message:'查询成功',code:1,results:results});
-        console.log(results);
+        //console.log(results);
     });
 });
+
+//房源分类接口
+app.get('/classify',(req,res)=>{
+    let sql='SELECT id,category FROM gspro_nav';
+    pool.query(sql,(err,results)=>{
+        if(err) throw err;
+        res.send({message:'查询成功',code:1,results:results});
+        //console.log(results);
+    });
+});
+
+//页面详情接口
+app.get('/list',(req,res)=>{
+    let id=req.query.id;
+    let sql ='SELECT id,images,title FROM gspro_holder WHERE nav_id=? ';
+    pool.query(sql,[id],(err,results)=>{
+        if(err) throw err;
+        res.send({message:'查询成功',code:1,results:results});
+        console.log(results);
+    })
+})
 
 //用户注册的接口
 app.post('/register',(req,res)=>{
@@ -48,7 +69,7 @@ app.post('/register',(req,res)=>{
         if(err) throw err;
         if(results.length == 0){
             sql = 'INSERT INTO gspro_user(username,password) VALUES(?,MD5(?))';
-            poll.query(sql,[username,password],(err,results)=>{
+            pool.query(sql,[username,password],(err,results)=>{
                 if(err) throw err;
                 res.send({message:'注册成功',code:1});
             });
@@ -62,7 +83,7 @@ app.post('/register',(req,res)=>{
 app.post('/login',(req,res)=>{
     let username=req.body.username;
     let password=md5(req.body.password);
-    let sql='SELSECT id,name,nickname,avatar FROM gspro_user WHERE username=? AND password=?'
+    let sql='SELECT id,username,nickname,avatar FROM gspro_user WHERE username=? AND password=?'
     pool.query(sql,[username,password],(err,results)=>{
         if(err) throw err;
         if(results.length == 1){
